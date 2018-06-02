@@ -40,36 +40,89 @@ import java.util.List;
 public class ArticleListFragment extends Fragment {
 
     private RecyclerView articlesViewList;
-    private ArticleListAdapter articleListAdapter;
+    private ArticleListAdapter articleListAdapter=null;
     private ViewSwitcher viewSwitcher;
 
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setRetainInstance(true);
+    }
 
     @Override
     public View onCreateView(LayoutInflater layoutInflater, ViewGroup parent, Bundle savedInstanceState) {
+
 
         View view = layoutInflater.inflate(R.layout.article_listing, parent, false);
         articlesViewList = (RecyclerView) view.findViewById(R.id.articleViewList);
         viewSwitcher=(ViewSwitcher)view.findViewById(R.id.switcher);
 
-        articleListAdapter = new ArticleListAdapter(getContext(), getFragmentManager());
-        articlesViewList.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        RetroFitClient retroFitClient = RetroFitClient.getRetroFitClient();
+
+
+        if(articleListAdapter == null) {
+            articlesViewList.setLayoutManager(new LinearLayoutManager(getContext()));
+            articleListAdapter = new ArticleListAdapter(getContext(), getFragmentManager());
+            retroFitClient.setAdapter(articleListAdapter);
+            articlesViewList.setAdapter(articleListAdapter);
+        }
 
         setHasOptionsMenu(true);
 
-        articlesViewList.setAdapter(articleListAdapter);
+        if(getArguments() == null ) {
+            retroFitClient.getTopStoriesByCountry("us");
+        }
+        else {
 
+            retroFitClient.getTopStoriesBySource(getArguments().getString(MainActivity.SOURCE_SELECTION));
+        }
 
-
-
-
-        RetroFitClient retroFitClient = RetroFitClient.getRetroFitClient();
-        retroFitClient.setAdapter(articleListAdapter);
-
-        retroFitClient.getTopStoriesByCountry("us");
         return view;
     }
 
+
+
     public void onBottomReached(int pos) {
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+      //  RetroFitClient.getRetroFitClient().reconnect();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.i("onStart","called");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i("onPause","called");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.i("onStop","called");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.i("onDestroy","called");
+    }
+
+
+
+
+    private void reconnect() {
+
+        RetroFitClient.getRetroFitClient().reconnect();
 
     }
 
@@ -138,7 +191,7 @@ public class ArticleListFragment extends Fragment {
 
         public void onSuccess() {
 
-             if(viewSwitcher.getNextView().getId() == R.id.articleViewList) {
+           if(viewSwitcher.getNextView().getId() == R.id.articleViewList) {
                  viewSwitcher.showNext();
              }
 
@@ -170,7 +223,6 @@ public class ArticleListFragment extends Fragment {
                 source=(TextView)v.findViewById(R.id.source);
                 separator=v.findViewById(R.id.separator);
 
-                //  ll=(LinearLayout)v.findViewById(R.id.layout);
                 v.setOnClickListener(this);
 
 
@@ -210,7 +262,13 @@ public class ArticleListFragment extends Fragment {
             articleViewHolder.source.setText(articlesList.get(i).source.name);
           //x  articleViewHolder.separator.setMinimumWidth(articleViewHolder.source.getWidth());
            // articleViewHolder.separator.getLayoutParams().width=articleViewHolder.source.getWidth();
-            Picasso.with(context).load(articlesList.get(i).urlToImage).fit().into(articleViewHolder.thumbnail);
+            if(articlesList.get(i).urlToImage!=null && articlesList.get(i).urlToImage.length() != 0) {
+                Picasso.with(context).load(articlesList.get(i).urlToImage).fit().into(articleViewHolder.thumbnail);
+            }
+            else {
+
+                articleViewHolder.thumbnail.setImageDrawable(getResources().getDrawable(R.drawable.placeholder));
+            }
           //  Log.i(" View id:", String.valueOf(thumbnail.getId()));
             Log.i("Test ITEM ID", String.valueOf(articleViewHolder.getLayoutPosition()));
 
@@ -221,7 +279,6 @@ public class ArticleListFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-
 
             return articlesList.size();
 

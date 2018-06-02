@@ -64,11 +64,15 @@ public class MainActivity extends AppCompatActivity {
     private LinkedList<String>faveLinkedList;
     private LinearLayout.LayoutParams buttonSection;
     private LinearLayout.LayoutParams faveListSection;
+    private String sourceSelection;
+    public static final String SOURCE_SELECTION="selected source";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
+
         drawerLayout=(DrawerLayout)findViewById(R.id.drawerLayout);
         navigationView=(NavigationView)findViewById(R.id.navigationView);
         toolbar=(Toolbar)findViewById(R.id.toolbar);
@@ -89,10 +93,24 @@ public class MainActivity extends AppCompatActivity {
         faveListViewInit();
         openSourcesFile();
         setMenuSettings();
-        startFragmentTransaction();
+
+        if(savedInstanceState==null) {
+            startFragmentTransaction();
+            Log.i("1st","call");
+        }
+        else {
+            Fragment fragment=getSupportFragmentManager().findFragmentByTag("articleList");
+            fragment.setArguments(savedInstanceState);
+        }
     }
 
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+
+        savedInstanceState.putString(SOURCE_SELECTION,sourceSelection);
+    }
     private void setButtonListeners() {
 
         addFavButton.setOnClickListener(new View.OnClickListener() {
@@ -113,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 showAllSourcesButton.setChecked(true);
+                sourceSelection="";
                 prevRadioButton=showAllSourcesButton;
                 drawerLayout.closeDrawers();
             }
@@ -183,9 +202,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 String name=faveListAdapter.getItem(i);
-                String id=new PublisherDatabase(getApplicationContext()).getNameID(name);
+                sourceSelection=new PublisherDatabase(getApplicationContext()).getNameID(name);
                 prevRadioButton=view.findViewById(R.id.radioButton);
-                RetroFitClient.getRetroFitClient().getTopStoriesBySource(id);
+                RetroFitClient.getRetroFitClient().getTopStoriesBySource(sourceSelection);
                 if(showAllSourcesButton.isChecked()) {
                     showAllSourcesButton.setChecked(false);
                 }
@@ -236,8 +255,10 @@ public class MainActivity extends AppCompatActivity {
 
         Fragment articleList=new ArticleListFragment();
 
+
         fragmentManager=getSupportFragmentManager();
-        fragmentManager.beginTransaction().add(R.id.activity_main,articleList).commit();
+        fragmentManager.beginTransaction().replace(R.id.activity_main,articleList,"articleList").commit();
+
     }
 
     private void initNavigationListener() {

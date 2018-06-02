@@ -33,6 +33,10 @@ public class RetroFitClient implements Callback<GSONCenter> {
     private List<String>publishers;
     private SQLiteDatabase database;
     private NewsAPI newsAPI;
+    private String source;
+    public enum feedSelector {
+        ALL,SOURCE,SEARCH;
+    }
 
     private RetroFitClient(){
         Gson gson = new GsonBuilder()
@@ -50,6 +54,8 @@ public class RetroFitClient implements Callback<GSONCenter> {
     }
 
 
+
+
     public static RetroFitClient getRetroFitClient() {
 
         if(retroFitClient==null) {
@@ -57,6 +63,11 @@ public class RetroFitClient implements Callback<GSONCenter> {
         }
 
         return retroFitClient;
+    }
+
+    public void reconnect() {
+        Call<GSONCenter>call=newsAPI.getTopStoriesSource(source,10,API_KEY);
+        call.enqueue(this);
     }
 
 
@@ -71,6 +82,7 @@ public class RetroFitClient implements Callback<GSONCenter> {
     }
 
     public void getStoriesBySearch(String searchTerm) {
+
         Call<GSONCenter>call =newsAPI.getStoriesBySearch(searchTerm,20,API_KEY);
         call.enqueue(this);
     }
@@ -81,7 +93,9 @@ public class RetroFitClient implements Callback<GSONCenter> {
     }
 
     public void getTopStoriesBySource(String source) {
-        Call<GSONCenter>call=newsAPI.getTopStoriesSource(source,10,API_KEY);
+
+        this.source=source;
+        Call<GSONCenter>call=newsAPI.getTopStoriesSource(source,20,API_KEY);
         call.enqueue(this);
     }
 
@@ -101,7 +115,7 @@ public class RetroFitClient implements Callback<GSONCenter> {
 
 
             }
-            else if(response.body().sources!=null){
+            else if(response.body().sources!=null) {
                 ContentValues cv=new ContentValues();
 
                 for( Source source : response.body().sources) {

@@ -47,6 +47,8 @@
 
 </FrameLayout>
 
+
+
     <include layout="@layout/navigation_fave_list_layout"/>
 
 

@@ -1,7 +1,9 @@
 package com.example.codyhammond.newshub;
 
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.support.v4.app.Fragment;
 import android.text.Layout;
 import android.util.Log;
@@ -32,12 +34,38 @@ public class WebViewFragment extends Fragment implements backPressInterface{
         webView=(WebView)view.findViewById(R.id.webView);
         webView.getSettings().setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient() {
+
+            @Override
+            public void onPageStarted(WebView webView,String url,Bitmap favicon) {
+                super.onPageStarted(webView,url,favicon);
+                CountDownTimer countDownTimer=new CountDownTimer(5000,1000) {
+                    @Override
+                    public void onTick(long l) {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        progressBar.setVisibility(View.GONE);
+                        Log.i("Timer","finished");
+
+                    }
+                };
+
+                countDownTimer.start();
+            }
+
             @Override
             public void onPageFinished(WebView webView,String url) {
+                super.onPageFinished(webView,url);
+                Log.i("finished","finished");
                 progressBar.setVisibility(View.GONE);
+
 
             }
         });
+
+
         Article article=(Article)getArguments().getSerializable("article");
 
         if(article!=null) {
