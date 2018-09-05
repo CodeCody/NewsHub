@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,7 +42,9 @@ public class ArticleListFragment extends Fragment {
 
     private RecyclerView articlesViewList;
     private ArticleListAdapter articleListAdapter=null;
+    private Button refreshButton;
     private ViewSwitcher viewSwitcher;
+    RetroFitClient retroFitClient;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -56,9 +59,10 @@ public class ArticleListFragment extends Fragment {
         View view = layoutInflater.inflate(R.layout.article_listing, parent, false);
         articlesViewList = (RecyclerView) view.findViewById(R.id.articleViewList);
         viewSwitcher=(ViewSwitcher)view.findViewById(R.id.switcher);
+        refreshButton=(Button)view.findViewById(R.id.refresh_button);
 
 
-        RetroFitClient retroFitClient = RetroFitClient.getRetroFitClient();
+        retroFitClient = RetroFitClient.getRetroFitClient();
 
 
         if(articleListAdapter == null) {
@@ -70,17 +74,27 @@ public class ArticleListFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        if(getArguments() == null ) {
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                connect();
+            }
+        });
+
+        connect();
+
+        return view;
+    }
+
+    private void connect() {
+        if(getArguments() == null || getArguments().getString(MainActivity.SOURCE_SELECTION) == null) {
             retroFitClient.getTopStoriesByCountry("us");
         }
         else {
 
             retroFitClient.getTopStoriesBySource(getArguments().getString(MainActivity.SOURCE_SELECTION));
         }
-
-        return view;
     }
-
 
 
     public void onBottomReached(int pos) {

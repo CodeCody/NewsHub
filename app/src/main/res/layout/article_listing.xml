@@ -19,5 +19,5 @@
 
       <include layout="@layout/list_view_empty"/>
 
-    </ViewSwitcher> -->
+    </ViewSwitcher>
 </android.support.v7.widget.ContentFrameLayout>

@@ -4,5 +4,6 @@
     <string name="close">close</string>
     <string name="menu_header"><b><u>FAVORITES</u></b></string>
     <string name="savedFaves">fave_sources</string>
+    <string name="refresh">Refresh</string>
     <string name="checkwifi">No results found, check internet connection.</string>
 </resources>
